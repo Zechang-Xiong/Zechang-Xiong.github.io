@@ -1,7 +1,6 @@
 window.siteConfig = {
   title: "Zechang Xiong",
-  description:
-    "Academic homepage for Zechang Xiong, featuring research interests, news, selected publications, services, and awards.",
+  description:"Homepage",
   favicon: "assets/favicon.svg",
   profile: {
     name: "Zechang Xiong",
@@ -9,12 +8,12 @@ window.siteConfig = {
     affiliation: "Beijing Jiaotong University",
     location: "Beijing, China",
     email: "zcxiong@bjtu.edu.cn",
-    github: "https://github.com/XiongZechang",
-    googleScholar: "#",
-    avatar: "assets/avatar-placeholder.svg",
+    github: "https://github.com/Zechang-Xiong",
+    googleScholar: "https://scholar.google.com/citations?user=NBlAdTcAAAAJ",
+    avatar: "assets/personal.JPG",
     bio: [
-      "I am a master's student focusing on multimodal affective computing and robust machine learning. My work studies how language, visual, and acoustic signals can be fused to model human emotion and sentiment more reliably.",
-      "I am especially interested in uncertainty-aware learning, evidential reasoning, and graph-inspired structures for multimodal understanding. This homepage keeps the main academic information easy to scan and easy to update.",
+      "I am Zechang Xiong, a master's student at the School of Software Engineering, Beijing Jiaotong University. Welcome to my homepage.",
+      "My research focuses on multimodal learning and affective computing, especially multimodal emotion recognition in conversation, uncertainty-aware learning, evidential reasoning, graph neural networks, and robust multimodal fusion. I am always open to academic discussions and potential collaborations. Please feel free to contact me.",
     ],
   },
   researchInterests: [

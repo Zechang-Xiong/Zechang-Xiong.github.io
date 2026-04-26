@@ -1,34 +1,5 @@
 title: "Zechang Xiong"
-description: "Academic homepage for Zechang Xiong, featuring research interests, news, selected publications, services, and awards."
+description: "Homeapge"
 favicon: "assets/favicon.svg"
 url: ""
 baseurl: ""
-
-profile:
-  name: "Zechang Xiong"
-  role: "Master's Student"
-  affiliation: "Beijing Jiaotong University"
-  location: "Beijing, China"
-  email: "zcxiong@bjtu.edu.cn"
-  github: "https://github.com/XiongZechang"
-  google_scholar: "#"
-  avatar: "assets/avatar-placeholder.svg"
-  bio:
-    - "I am a master's student focusing on multimodal affective computing and robust machine learning. My work studies how language, visual, and acoustic signals can be fused to model human emotion and sentiment more reliably."
-    - "I am especially interested in uncertainty-aware learning, evidential reasoning, and graph-inspired structures for multimodal understanding. This homepage keeps the main academic information easy to scan and easy to update."
-
-research_interests:
-  - title: "Multimodal Emotion Recognition"
-    summary: "Modeling emotional dynamics from text, audio, and visual signals in conversational and social settings."
-  - title: "Uncertainty-aware Learning"
-    summary: "Designing evidence-aware methods that expose model confidence and improve reliability under ambiguity."
-  - title: "Graph-based Multimodal Modeling"
-    summary: "Using relational structures to capture interactions across modalities, speakers, and contextual cues."
-
-services:
-  - title: "Peer Review"
-    summary: "Reviewer service and academic community contributions can be listed here."
-  - title: "Academic Activities"
-    summary: "Talks, workshops, seminars, and organizing roles can be added as they become public."
-  - title: "Open-source Contribution"
-    summary: "Research code, reproducibility work, and public tooling can be linked from this section."

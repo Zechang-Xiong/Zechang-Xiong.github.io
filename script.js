@@ -79,7 +79,7 @@ function applyTheme(theme, persist = true) {
 
 function renderProfile() {
   if (siteConfig.title) {
-    document.title = `${siteConfig.title} | Academic Homepage`;
+    document.title = `${siteConfig.title} | Homepage`;
   }
 
   const description = document.querySelector('meta[name="description"]');
@@ -200,9 +200,8 @@ function renderPublications() {
       const year = createElement("div", "publication-year", item.year);
       const body = createElement("div", "publication-body");
       body.append(
-        createElement("h3", "", item.title),
-        createElement("p", "publication-authors", item.authors),
-        createElement("p", "publication-venue", item.venue)
+        createElement("h3", "", `[${item.venue}] ${item.title}`),
+        createElement("p", "publication-authors", item.authors)
       );
 
       if (item.summary) {
@@ -259,26 +258,10 @@ function renderAwards() {
     ...items.map((item) => {
       const article = createElement("article", "award-item");
       const dateWrap = createElement("div", "award-date");
-      if (item.date) {
-        const time = createElement("time", "", formatDate(item.date, { month: "short", year: "numeric" }));
-        time.setAttribute("datetime", item.date);
-        dateWrap.append(time);
-      } else {
-        dateWrap.append(createElement("span", "", item.year));
-      }
-
+      dateWrap.append(createElement("span", "", item.year));
+      
       const body = createElement("div");
       body.append(createElement("h3", "", item.title), createElement("p", "award-issuer", item.issuer));
-      if (item.summary) {
-        body.append(createElement("p", "", item.summary));
-      }
-      if (item.link) {
-        const link = createElement("a", "text-link", "Details");
-        link.href = item.link;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-        body.append(link);
-      }
 
       article.append(dateWrap, body);
       return article;

@@ -1,24 +1,8 @@
 window.publicationItems = [
   {
-    title: "Title pending public release",
-    authors: "Zechang Xiong, Coauthors",
-    venue: "Conference or Journal TBD",
-    year: "2026",
-    summary:
-      "Replace this placeholder with the formal paper title, authors, venue, and links when public details are ready.",
-  },
-  {
-    title: "Publication entry template",
-    authors: "Zechang Xiong, Coauthors",
-    venue: "Venue TBD",
+    title: "ESED: Emotion-Specific Evidence Decomposition for Uncertainty-Aware Multimodal Emotion Recognition in Conversation",
+    authors: "Zechang Xiong, Zhenyan Ji*, Wenkang Kong, Jiuqian Dai, Shen Yin",
+    venue: "CIKM'25",
     year: "2025",
-    summary: "Use this record as a template for adding selected publications through the data file.",
-  },
-  {
-    title: "Another selected publication slot",
-    authors: "Zechang Xiong, Coauthors",
-    venue: "Venue TBD",
-    year: "2025",
-    summary: "Additional papers can be added by appending more records to this file.",
   },
 ];

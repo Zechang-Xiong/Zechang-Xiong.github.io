@@ -1,20 +1,22 @@
 window.awardItems = [
   {
-    date: "2026-04-01",
-    title: "Award title placeholder",
-    issuer: "Issuer TBD",
-    summary: "Replace this placeholder with a real award, honor, scholarship, or competition record.",
-  },
-  {
-    date: "2025-12-01",
-    title: "Scholarship or honor placeholder",
-    issuer: "Institution TBD",
-    summary: "Award records are stored separately from the main HTML template.",
+    year: "2026",
+    title: "National Scholarship",
+    issuer: "Ministry of Education of the People's Republic of China",
   },
   {
     year: "2025",
-    title: "Academic recognition placeholder",
-    issuer: "Organization TBD",
-    summary: "Use either a precise date or a year depending on the information you want to show.",
+    title: "National Scholarship",
+    issuer: "Ministry of Education of the People's Republic of China",
   },
+  {
+    year: "2023",
+    title: "Award for Best Bachelor's Thesis",
+    issuer: "Hebei Province, China",
+  },
+  {
+    year: "2023",
+    title: "Award for Outstanding Graduate",
+    issuer: "Hebei Province, China",
+  }
 ];
