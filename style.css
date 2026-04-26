@@ -102,7 +102,7 @@ h3 {
 .page-shell {
   width: var(--content-width);
   margin: 0 auto;
-  padding: 22px 0 42px;
+  padding: 18px 0 30px;
 }
 
 .site-header {
@@ -112,10 +112,10 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
-  min-height: 68px;
-  margin-bottom: 34px;
-  padding: 12px;
+  gap: 14px;
+  min-height: 62px;
+  margin-bottom: 22px;
+  padding: 10px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface-translucent);
@@ -217,18 +217,18 @@ main {
 
 .section {
   scroll-margin-top: 130px;
-  padding: 27px 0;
+  padding: 10px 0;
   border-top: 0;
 }
 
 .section:first-child {
   border-top: 0;
-  padding-top: 10px;
+  padding-top: 4px;
 }
 
 .section-header {
   max-width: 760px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .section-kicker {
@@ -250,7 +250,7 @@ h2 {
   text-transform: uppercase;
   color: var(--accent-strong);
   font-family: var(--font-serif);
-  font-size: 2rem;
+  font-size: 1.72rem;
   line-height: 1.18;
 }
 
@@ -263,15 +263,15 @@ h3 {
 .profile-section {
   display: grid;
   grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
-  gap: 30px;
+  gap: 24px;
   align-items: start;
 }
 
 .profile-card {
   display: grid;
   justify-items: center;
-  gap: 14px;
-  padding: 22px 18px;
+  gap: 11px;
+  padding: 18px 16px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
@@ -347,9 +347,9 @@ h3 {
 
 .profile-bio {
   display: grid;
-  gap: 16px;
+  gap: 12px;
   max-width: 780px;
-  margin-top: 22px;
+  margin-top: 16px;
   color: var(--text-muted);
   font-size: 1.05rem;
   overflow-wrap: anywhere;
@@ -363,7 +363,7 @@ h3 {
 }
 
 .section-card {
-  padding: 22px;
+  padding: 18px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
@@ -371,14 +371,14 @@ h3 {
 }
 
 .section-card-intro {
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   color: var(--text-muted);
 }
 
 .ordered-list,
 .bullet-list {
   display: grid;
-  gap: 14px;
+  gap: 10px;
   margin: 0;
 }
 
@@ -397,11 +397,11 @@ h3 {
 }
 
 .news-list {
-  gap: 12px;
+  gap: 9px;
 }
 
 .publication-list-items {
-  gap: 16px;
+  gap: 12px;
 }
 
 .list-date {
@@ -508,27 +508,37 @@ h3 {
 
 .text-link,
 .item-links a,
-.publication-info-row a {
+.publication-action {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   min-height: 34px;
   margin-top: 12px;
   padding: 0 10px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
+  background: transparent;
   color: var(--accent);
+  font: inherit;
   font-weight: 700;
+  cursor: pointer;
   transition: background-color 160ms ease, border-color 160ms ease;
 }
 
 .text-link:hover,
 .item-links a:hover,
-.publication-info-row a:hover,
+.publication-action:hover,
 .text-link:focus-visible,
 .item-links a:focus-visible,
-.publication-info-row a:focus-visible {
+.publication-action:focus-visible {
   border-color: var(--line-strong);
   background: var(--accent-muted);
+}
+
+.action-icon {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
 }
 
 .card-grid {
@@ -549,8 +559,122 @@ h3 {
   margin-top: 4px;
 }
 
-.publication-info-row a {
+.publication-action {
   margin-top: 0;
+}
+
+.has-modal {
+  overflow: hidden;
+}
+
+.citation-modal[hidden] {
+  display: none;
+}
+
+.citation-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.citation-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.66);
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.citation-dialog {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  width: min(720px, calc(100vw - 32px));
+  max-height: min(78vh, 640px);
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.citation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.citation-header h3 {
+  font-size: 1rem;
+}
+
+.citation-close-button {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.citation-close-button:hover,
+.citation-close-button:focus-visible {
+  border-color: var(--line-strong);
+  background: var(--accent-muted);
+  color: var(--text);
+}
+
+.citation-work-title {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  font-weight: 650;
+}
+
+.citation-bib {
+  max-height: 340px;
+  margin: 0;
+  overflow: auto;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.citation-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.citation-copy-button {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--accent-muted);
+  color: var(--accent);
+  font-weight: 760;
+  cursor: pointer;
+}
+
+.citation-copy-button:hover,
+.citation-copy-button:focus-visible {
+  border-color: var(--line-strong);
+  background: var(--surface-raised);
 }
 
 .service-list-item {
@@ -628,16 +752,6 @@ h3 {
 
 .item-links a {
   margin-top: 0;
-}
-
-.site-footer {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-  padding-top: 28px;
-  border-top: 1px solid var(--line);
-  color: var(--text-soft);
-  font-size: 0.9rem;
 }
 
 [data-reveal] {
@@ -718,7 +832,7 @@ h3 {
   }
 
   .section {
-    padding: 21px 0;
+    padding: 8px 0;
   }
 
   h1 {
@@ -726,7 +840,7 @@ h3 {
   }
 
   h2 {
-    font-size: 1.65rem;
+    font-size: 1.45rem;
   }
 
 }

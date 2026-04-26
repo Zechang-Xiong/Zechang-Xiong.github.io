@@ -6,6 +6,15 @@ const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)
 
 const siteConfig = window.siteConfig || {};
 const profile = siteConfig.profile || {};
+const citationModal = {
+  element: null,
+  title: null,
+  workTitle: null,
+  bib: null,
+  copyButton: null,
+  lastTrigger: null,
+  restoreTimer: null,
+};
 
 function setText(selector, value) {
   if (!value) {
@@ -55,6 +64,181 @@ function createTextLink(label, url) {
   link.target = "_blank";
   link.rel = "noopener noreferrer";
   return link;
+}
+
+function createIcon(name) {
+  const paths = {
+    pdf: "M6 2h7l5 5v15H6V2Zm7 1.7V8h4.3L13 3.7ZM8 12h8v1.8H8V12Zm0 3.4h8v1.8H8v-1.8Z",
+    code: "M8.7 16.3 4.4 12l4.3-4.3 1.4 1.4L7.2 12l2.9 2.9-1.4 1.4Zm6.6 0-1.4-1.4 2.9-2.9-2.9-2.9 1.4-1.4 4.3 4.3-4.3 4.3ZM11.2 18l-1.9-.6 3.5-11.4 1.9.6L11.2 18Z",
+    cite: "M7.7 6.5c-1.8 1.3-2.7 2.9-2.7 4.8v5.2h6.1v-6H8.3c.1-.9.7-1.8 1.8-2.7L7.7 6.5Zm8 0c-1.8 1.3-2.7 2.9-2.7 4.8v5.2h6.1v-6h-2.8c.1-.9.7-1.8 1.8-2.7l-2.4-1.3Z",
+    link: "M10.6 13.4a1 1 0 0 1 0-1.4l2.7-2.7a3 3 0 0 1 4.2 4.2l-2.1 2.1a3 3 0 0 1-4.2 0 1 1 0 1 1 1.4-1.4 1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0-1.4-1.4L12 13.4a1 1 0 0 1-1.4 0Zm2.8-2.8a1 1 0 0 1 0 1.4l-2.7 2.7a3 3 0 0 1-4.2-4.2l2.1-2.1a3 3 0 0 1 4.2 0 1 1 0 1 1-1.4 1.4 1 1 0 0 0-1.4 0L7.9 9.9a1 1 0 0 0 1.4 1.4l2.7-2.7a1 1 0 0 1 1.4 0Z",
+    close: "m6.4 5 5.6 5.6L17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4 6.4 5Z",
+  };
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  svg.setAttribute("class", "action-icon");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("aria-hidden", "true");
+  path.setAttribute("d", paths[name] || paths.link);
+  svg.append(path);
+  return svg;
+}
+
+function createPublicationLink(label, url, iconName) {
+  const link = createTextLink(label, url);
+  if (!link) {
+    return null;
+  }
+
+  link.className = "publication-action";
+  link.replaceChildren(createIcon(iconName), createElement("span", "", label));
+  return link;
+}
+
+function isProbablyUrl(value) {
+  return typeof value === "string" && /^(https?:|mailto:|#)/i.test(value.trim());
+}
+
+function citationTextFor(item) {
+  if (item.cite && typeof item.cite === "object" && !Array.isArray(item.cite)) {
+    return firstDefined(item.cite.bib, item.cite.bibtex, item.cite.text, item.cite.citation);
+  }
+
+  const directCitation = firstDefined(item.bib, item.bibtex, item.citation, item.citeText);
+  if (directCitation) {
+    return directCitation;
+  }
+
+  if (typeof item.cite === "string" && !isProbablyUrl(item.cite)) {
+    return item.cite;
+  }
+
+  return "";
+}
+
+function ensureCitationModal() {
+  if (citationModal.element) {
+    return;
+  }
+
+  const modal = createElement("div", "citation-modal");
+  modal.setAttribute("hidden", "");
+
+  const backdrop = createElement("button", "citation-backdrop");
+  backdrop.type = "button";
+  backdrop.setAttribute("aria-label", "Close citation dialog");
+
+  const dialog = createElement("section", "citation-dialog");
+  dialog.setAttribute("role", "dialog");
+  dialog.setAttribute("aria-modal", "true");
+  dialog.setAttribute("aria-labelledby", "citation-dialog-title");
+
+  const header = createElement("div", "citation-header");
+  const title = createElement("h3", "", "BibTeX");
+  title.id = "citation-dialog-title";
+  const closeButton = createElement("button", "citation-close-button");
+  closeButton.type = "button";
+  closeButton.setAttribute("aria-label", "Close citation dialog");
+  closeButton.append(createIcon("close"));
+  header.append(title, closeButton);
+
+  const workTitle = createElement("p", "citation-work-title");
+  const bib = createElement("pre", "citation-bib");
+  const bibCode = createElement("code", "");
+  bib.append(bibCode);
+
+  const actions = createElement("div", "citation-actions");
+  const copyButton = createElement("button", "citation-copy-button", "Copy BibTeX");
+  copyButton.type = "button";
+  actions.append(copyButton);
+
+  dialog.append(header, workTitle, bib, actions);
+  modal.append(backdrop, dialog);
+  document.body.append(modal);
+
+  citationModal.element = modal;
+  citationModal.title = title;
+  citationModal.workTitle = workTitle;
+  citationModal.bib = bibCode;
+  citationModal.copyButton = copyButton;
+
+  backdrop.addEventListener("click", closeCitationModal);
+  closeButton.addEventListener("click", closeCitationModal);
+  copyButton.addEventListener("click", copyCitation);
+}
+
+function openCitationModal(workTitle, bibText, trigger) {
+  ensureCitationModal();
+  citationModal.lastTrigger = trigger;
+  citationModal.workTitle.textContent = workTitle || "Citation";
+  citationModal.bib.textContent = bibText;
+  citationModal.copyButton.textContent = "Copy BibTeX";
+  citationModal.element.removeAttribute("hidden");
+  document.body.classList.add("has-modal");
+  citationModal.copyButton.focus();
+}
+
+function closeCitationModal() {
+  if (!citationModal.element || citationModal.element.hasAttribute("hidden")) {
+    return;
+  }
+
+  citationModal.element.setAttribute("hidden", "");
+  document.body.classList.remove("has-modal");
+  if (citationModal.lastTrigger) {
+    citationModal.lastTrigger.focus();
+  }
+}
+
+async function copyTextToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = createElement("textarea", "");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.inset = "0 auto auto 0";
+  textarea.style.opacity = "0";
+  document.body.append(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  textarea.remove();
+}
+
+async function copyCitation() {
+  const bibText = citationModal.bib ? citationModal.bib.textContent : "";
+  if (!bibText) {
+    return;
+  }
+
+  try {
+    await copyTextToClipboard(bibText);
+    citationModal.copyButton.textContent = "Copied";
+  } catch (error) {
+    citationModal.copyButton.textContent = "Copy failed";
+  }
+
+  window.clearTimeout(citationModal.restoreTimer);
+  citationModal.restoreTimer = window.setTimeout(() => {
+    citationModal.copyButton.textContent = "Copy BibTeX";
+  }, 1600);
+}
+
+function createCitationButton(item) {
+  const bibText = citationTextFor(item);
+  if (!bibText) {
+    return null;
+  }
+
+  const button = createElement("button", "publication-action citation-trigger");
+  button.type = "button";
+  button.setAttribute("aria-haspopup", "dialog");
+  button.append(createIcon("cite"), createElement("span", "", "Cite"));
+  button.addEventListener("click", () => openCitationModal(item.title, bibText, button));
+  return button;
 }
 
 function appendExternalLinks(container, links) {
@@ -127,7 +311,6 @@ function renderProfile() {
   setText("[data-profile-role]", profile.role);
   setText("[data-profile-affiliation]", profile.affiliation);
   setText("[data-profile-location]", profile.location);
-  setText("[data-current-year]", String(new Date().getFullYear()));
 
   const avatar = document.querySelector("[data-profile-avatar]");
   if (avatar && profile.avatar) {
@@ -256,12 +439,12 @@ function renderPublications() {
 
     const infoRow = createElement("div", "publication-info-row");
     const dataLinks = Array.isArray(item.links)
-      ? item.links.map((link) => createTextLink(link.label || "Link", link.url))
+      ? item.links.map((link) => createPublicationLink(link.label || "Link", link.url, link.icon || "link"))
       : [];
     const itemLinks = [
-      createTextLink("PDF", firstDefined(item.pdf, item.pdfUrl)),
-      createTextLink("Code", firstDefined(item.code, item.codeUrl)),
-      createTextLink("Cite", firstDefined(item.cite, item.citeUrl, item.bibtex)),
+      createPublicationLink("PDF", firstDefined(item.pdf, item.pdfUrl), "pdf"),
+      createPublicationLink("Code", firstDefined(item.code, item.codeUrl), "code"),
+      createCitationButton(item),
       ...dataLinks,
     ].filter(Boolean);
 
@@ -376,6 +559,12 @@ if (themeToggle) {
     applyTheme(currentTheme() === "light" ? "dark" : "light");
   });
 }
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeCitationModal();
+  }
+});
 
 renderContent();
 
