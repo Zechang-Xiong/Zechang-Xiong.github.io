@@ -41,6 +41,37 @@ function formatDate(dateValue, options = { month: "short", day: "numeric", year:
   return new Intl.DateTimeFormat("en", options).format(date);
 }
 
+function firstDefined(...values) {
+  return values.find((value) => value !== undefined && value !== null && value !== "");
+}
+
+function createTextLink(label, url) {
+  if (!url) {
+    return null;
+  }
+
+  const link = createElement("a", "", label);
+  link.href = url;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  return link;
+}
+
+function appendExternalLinks(container, links) {
+  const validLinks = links.filter(Boolean);
+  if (validLinks.length === 0) {
+    return;
+  }
+
+  const linkGroup = createElement("div", "item-links");
+  validLinks.forEach((link) => linkGroup.append(link));
+  container.append(linkGroup);
+}
+
+function createPill(text, className = "") {
+  return createElement("span", `meta-pill ${className}`.trim(), text);
+}
+
 function currentTheme() {
   return root.getAttribute("data-theme") === "light" ? "light" : "dark";
 }
@@ -139,32 +170,32 @@ function renderNews() {
     .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))
     .slice(0, 5);
 
-  list.replaceChildren(
-    ...items.map((item) => {
-      const article = createElement("article", "timeline-item");
-      const time = createElement("time", "", formatDate(item.date));
-      if (item.date) {
-        time.setAttribute("datetime", item.date);
-      }
+  const card = createElement("article", "section-card");
+  const newsList = createElement("ul", "bullet-list news-list");
 
-      const body = createElement("div");
-      body.append(
-        createElement("h3", "", item.title),
-        createElement("p", "", item.summary)
-      );
+  items.forEach((item) => {
+    const row = createElement("li", "news-list-item");
+    const body = createElement("div", "list-content");
+    const heading = createElement("div", "list-heading news-heading");
+    const time = createElement("time", "list-date inline-date", formatDate(item.date));
+    if (item.date) {
+      time.setAttribute("datetime", item.date);
+    }
 
-      if (item.link) {
-        const link = createElement("a", "text-link", "Read more");
-        link.href = item.link;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-        body.append(link);
-      }
+    heading.append(time, createElement("h3", "", item.title));
+    body.append(heading, createElement("p", "", item.summary));
 
-      article.append(time, body);
-      return article;
-    })
-  );
+    const link = createTextLink("Read more", item.link);
+    if (link) {
+      appendExternalLinks(body, [link]);
+    }
+
+    row.append(body);
+    newsList.append(row);
+  });
+
+  card.append(newsList);
+  list.replaceChildren(card);
 }
 
 function renderResearch() {
@@ -174,17 +205,18 @@ function renderResearch() {
     return;
   }
 
-  list.replaceChildren(
-    ...items.map((item, index) => {
-      const article = createElement("article", "info-card");
-      article.append(
-        createElement("span", "card-index", String(index + 1).padStart(2, "0")),
-        createElement("h3", "", item.title),
-        createElement("p", "", item.summary)
-      );
-      return article;
-    })
-  );
+  const card = createElement("article", "section-card");
+  card.append(createElement("p", "section-card-intro", siteConfig.researchIntro || "My current research interests include:"));
+
+  const bulletList = createElement("ul", "bullet-list");
+  items.forEach((item) => {
+    const row = createElement("li", "");
+    row.append(createElement("h3", "", item.title), createElement("p", "", item.summary));
+    bulletList.append(row);
+  });
+
+  card.append(bulletList);
+  list.replaceChildren(card);
 }
 
 function renderPublications() {
@@ -194,41 +226,57 @@ function renderPublications() {
     return;
   }
 
-  list.replaceChildren(
-    ...items.map((item) => {
-      const article = createElement("article", "publication-item");
-      const year = createElement("div", "publication-year", item.year);
-      const body = createElement("div", "publication-body");
-      body.append(
-        createElement("h3", "", `[${item.venue}] ${item.title}`),
-        createElement("p", "publication-authors", item.authors)
-      );
+  const card = createElement("article", "section-card");
+  const orderedList = createElement("ol", "ordered-list publication-ordered-list");
 
-      if (item.summary) {
-        body.append(createElement("p", "", item.summary));
-      }
+  items.forEach((item) => {
+    const row = createElement("li", "ordered-list-item publication-list-item");
+    const body = createElement("div", "list-content publication-body");
+    const title = createElement("h3", "publication-title");
 
-      if (Array.isArray(item.links)) {
-        const links = createElement("div", "item-links");
-        links.setAttribute("aria-label", "Publication links");
-        item.links
-          .filter((link) => link.url)
-          .forEach((link) => {
-            const anchor = createElement("a", "", link.label || "Link");
-            anchor.href = link.url;
-            anchor.target = "_blank";
-            anchor.rel = "noopener noreferrer";
-            links.append(anchor);
-          });
-        if (links.childElementCount > 0) {
-          body.append(links);
-        }
-      }
+    const venue = [item.venue, item.year].filter(Boolean).join(" · ");
+    if (venue) {
+      title.append(createElement("span", "publication-venue-inline", venue), document.createTextNode(` ${item.title}`));
+    } else {
+      title.textContent = item.title;
+    }
 
-      article.append(year, body);
-      return article;
-    })
-  );
+    body.append(title);
+    body.append(createElement("p", "publication-meta", item.authors));
+
+    if (item.summary) {
+      body.append(createElement("p", "", item.summary));
+    }
+
+    const infoRow = createElement("div", "publication-info-row");
+    const dataLinks = Array.isArray(item.links)
+      ? item.links.map((link) => createTextLink(link.label || "Link", link.url))
+      : [];
+    const itemLinks = [
+      createTextLink("PDF", firstDefined(item.pdf, item.pdfUrl)),
+      createTextLink("Code", firstDefined(item.code, item.codeUrl)),
+      createTextLink("Cite", firstDefined(item.cite, item.citeUrl, item.bibtex)),
+      ...dataLinks,
+    ].filter(Boolean);
+
+    itemLinks.forEach((link) => infoRow.append(link));
+
+    const ratings = [
+      firstDefined(item.ccf, item.ccfRating) ? `CCF ${firstDefined(item.ccf, item.ccfRating)}` : "",
+      firstDefined(item.core, item.coreRating) ? `CORE ${firstDefined(item.core, item.coreRating)}` : "",
+    ].filter(Boolean);
+
+    ratings.forEach((rating) => infoRow.append(createPill(rating, "rating-pill")));
+    if (infoRow.childElementCount > 0) {
+      body.append(infoRow);
+    }
+
+    row.append(body);
+    orderedList.append(row);
+  });
+
+  card.append(orderedList);
+  list.replaceChildren(card);
 }
 
 function renderServices() {
@@ -238,13 +286,18 @@ function renderServices() {
     return;
   }
 
-  list.replaceChildren(
-    ...items.map((item) => {
-      const article = createElement("article", "info-card");
-      article.append(createElement("h3", "", item.title), createElement("p", "", item.summary));
-      return article;
-    })
-  );
+  const card = createElement("article", "section-card");
+  card.append(createElement("p", "section-card-intro", siteConfig.servicesIntro || "Selected academic service and professional activities include:"));
+
+  const bulletList = createElement("ul", "bullet-list");
+  items.forEach((item) => {
+    const row = createElement("li", "");
+    row.append(createElement("h3", "", item.title), createElement("p", "", item.summary));
+    bulletList.append(row);
+  });
+
+  card.append(bulletList);
+  list.replaceChildren(card);
 }
 
 function renderAwards() {
@@ -254,19 +307,39 @@ function renderAwards() {
     return;
   }
 
-  list.replaceChildren(
-    ...items.map((item) => {
-      const article = createElement("article", "award-item");
-      const dateWrap = createElement("div", "award-date");
-      dateWrap.append(createElement("span", "", item.year));
-      
-      const body = createElement("div");
-      body.append(createElement("h3", "", item.title), createElement("p", "award-issuer", item.issuer));
+  const card = createElement("article", "section-card");
+  const orderedList = createElement("ol", "ordered-list");
 
-      article.append(dateWrap, body);
-      return article;
-    })
-  );
+  items.forEach((item) => {
+    const row = createElement("li", "ordered-list-item");
+    const body = createElement("div", "list-content");
+    const heading = createElement("div", "list-heading award-heading");
+    heading.append(
+      createElement("span", "list-date inline-date", item.year || formatDate(item.date, { month: "short", year: "numeric" })),
+      createElement("h3", "", item.title)
+    );
+
+    const issuer = firstDefined(item.issuer, item.organization);
+    if (issuer) {
+      heading.append(createElement("span", "award-issuer-inline", issuer));
+    }
+    body.append(heading);
+
+    if (item.summary) {
+      body.append(createElement("p", "", item.summary));
+    }
+
+    const link = createTextLink("Details", item.link);
+    if (link) {
+      appendExternalLinks(body, [link]);
+    }
+
+    row.append(body);
+    orderedList.append(row);
+  });
+
+  card.append(orderedList);
+  list.replaceChildren(card);
 }
 
 function renderContent() {
