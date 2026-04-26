@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="ZX favicon">
+  <rect width="64" height="64" rx="14" fill="#171a16"/>
+  <path d="M16 18h30L22 46h28" fill="none" stroke="#91e3ad" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M18 46 46 18" fill="none" stroke="#d1a96f" stroke-width="4" stroke-linecap="round"/>
+</svg>

@@ -1,10 +1,59 @@
-const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const root = document.documentElement;
+const themeToggle = document.querySelector("[data-theme-toggle]");
+const themeLabel = document.querySelector("[data-theme-label]");
+const themeStorageKey = "theme";
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-if (!prefersReducedMotion.matches) {
-  window.addEventListener("pointermove", (event) => {
-    root.style.setProperty("--pointer-x", `${event.clientX}px`);
-    root.style.setProperty("--pointer-y", `${event.clientY}px`);
+function currentTheme() {
+  return root.getAttribute("data-theme") === "light" ? "light" : "dark";
+}
+
+function updateThemeToggle() {
+  if (!themeToggle) {
+    return;
+  }
+
+  const isLight = currentTheme() === "light";
+  themeToggle.setAttribute("aria-pressed", String(isLight));
+  themeToggle.setAttribute("aria-label", isLight ? "Switch to dark theme" : "Switch to light theme");
+
+  if (themeLabel) {
+    themeLabel.textContent = isLight ? "Dark" : "Light";
+  }
+}
+
+function applyTheme(theme, persist = true) {
+  if (theme === "light") {
+    root.setAttribute("data-theme", "light");
+  } else {
+    root.removeAttribute("data-theme");
+  }
+
+  if (persist) {
+    try {
+      localStorage.setItem(themeStorageKey, theme);
+    } catch (error) {
+      // Theme switching should still work when storage is unavailable.
+    }
+  }
+
+  updateThemeToggle();
+}
+
+try {
+  const storedTheme = localStorage.getItem(themeStorageKey);
+  if (storedTheme === "light" || storedTheme === "dark") {
+    applyTheme(storedTheme, false);
+  } else {
+    updateThemeToggle();
+  }
+} catch (error) {
+  updateThemeToggle();
+}
+
+if (themeToggle) {
+  themeToggle.addEventListener("click", () => {
+    applyTheme(currentTheme() === "light" ? "dark" : "light");
   });
 }
 
@@ -12,15 +61,16 @@ const navLinks = Array.from(document.querySelectorAll(".site-nav a"));
 const sectionMap = new Map(
   navLinks
     .map((link) => {
-      const target = document.querySelector(link.getAttribute("href"));
+      const targetId = link.getAttribute("href");
+      const target = targetId ? document.querySelector(targetId) : null;
       return target ? [target.id, link] : null;
     })
     .filter(Boolean)
 );
 
-const revealTargets = document.querySelectorAll("[data-reveal]");
+const revealTargets = Array.from(document.querySelectorAll("[data-reveal]"));
 
-if (prefersReducedMotion.matches) {
+if (prefersReducedMotion.matches || !("IntersectionObserver" in window)) {
   revealTargets.forEach((element) => element.classList.add("is-visible"));
 } else {
   const revealObserver = new IntersectionObserver(
@@ -32,30 +82,33 @@ if (prefersReducedMotion.matches) {
         }
       });
     },
-    { threshold: 0.16 }
+    { threshold: 0.12 }
   );
 
   revealTargets.forEach((element) => revealObserver.observe(element));
 }
 
-const sectionObserver = new IntersectionObserver(
-  (entries) => {
-    const visibleEntries = entries.filter((entry) => entry.isIntersecting);
+if ("IntersectionObserver" in window) {
+  const sectionObserver = new IntersectionObserver(
+    (entries) => {
+      const visibleEntries = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
 
-    visibleEntries.forEach((entry) => {
-      navLinks.forEach((link) => link.classList.remove("is-active"));
-      const activeLink = sectionMap.get(entry.target.id);
-      if (activeLink) {
-        activeLink.classList.add("is-active");
+      if (visibleEntries.length === 0) {
+        return;
       }
-    });
-  },
-  {
-    rootMargin: "-30% 0px -55% 0px",
-    threshold: [0.2, 0.45, 0.7],
-  }
-);
 
-document.querySelectorAll("[data-section]").forEach((section) => {
-  sectionObserver.observe(section);
-});
+      const activeLink = sectionMap.get(visibleEntries[0].target.id);
+      navLinks.forEach((link) => link.classList.toggle("is-active", link === activeLink));
+    },
+    {
+      rootMargin: "-24% 0px -58% 0px",
+      threshold: [0.15, 0.35, 0.6],
+    }
+  );
+
+  document.querySelectorAll("[data-section]").forEach((section) => {
+    sectionObserver.observe(section);
+  });
+}
