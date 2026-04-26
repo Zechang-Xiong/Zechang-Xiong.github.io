@@ -4,6 +4,43 @@ const themeLabel = document.querySelector("[data-theme-label]");
 const themeStorageKey = "theme";
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
+const siteConfig = window.siteConfig || {};
+const profile = siteConfig.profile || {};
+
+function setText(selector, value) {
+  if (!value) {
+    return;
+  }
+
+  document.querySelectorAll(selector).forEach((element) => {
+    element.textContent = value;
+  });
+}
+
+function createElement(tagName, className, textContent) {
+  const element = document.createElement(tagName);
+  if (className) {
+    element.className = className;
+  }
+  if (textContent) {
+    element.textContent = textContent;
+  }
+  return element;
+}
+
+function formatDate(dateValue, options = { month: "short", day: "numeric", year: "numeric" }) {
+  if (!dateValue) {
+    return "";
+  }
+
+  const date = new Date(`${dateValue}T00:00:00`);
+  if (Number.isNaN(date.getTime())) {
+    return dateValue;
+  }
+
+  return new Intl.DateTimeFormat("en", options).format(date);
+}
+
 function currentTheme() {
   return root.getAttribute("data-theme") === "light" ? "light" : "dark";
 }
@@ -40,6 +77,224 @@ function applyTheme(theme, persist = true) {
   updateThemeToggle();
 }
 
+function renderProfile() {
+  if (siteConfig.title) {
+    document.title = `${siteConfig.title} | Academic Homepage`;
+  }
+
+  const description = document.querySelector('meta[name="description"]');
+  if (description && siteConfig.description) {
+    description.setAttribute("content", siteConfig.description);
+  }
+
+  const favicon = document.querySelector('link[rel="icon"]');
+  if (favicon && siteConfig.favicon) {
+    favicon.setAttribute("href", siteConfig.favicon);
+  }
+
+  setText("[data-profile-name]", profile.name);
+  setText("[data-profile-role]", profile.role);
+  setText("[data-profile-affiliation]", profile.affiliation);
+  setText("[data-profile-location]", profile.location);
+  setText("[data-current-year]", String(new Date().getFullYear()));
+
+  const avatar = document.querySelector("[data-profile-avatar]");
+  if (avatar && profile.avatar) {
+    avatar.setAttribute("src", profile.avatar);
+    avatar.setAttribute("alt", `${profile.name || "Profile"} portrait`);
+  }
+
+  const scholar = document.querySelector("[data-profile-scholar]");
+  if (scholar && profile.googleScholar) {
+    scholar.setAttribute("href", profile.googleScholar);
+    if (profile.googleScholar !== "#") {
+      scholar.setAttribute("target", "_blank");
+      scholar.setAttribute("rel", "noopener noreferrer");
+    }
+  }
+
+  const github = document.querySelector("[data-profile-github]");
+  if (github && profile.github) {
+    github.setAttribute("href", profile.github);
+  }
+
+  const email = document.querySelector("[data-profile-email]");
+  if (email && profile.email) {
+    email.setAttribute("href", `mailto:${profile.email}`);
+  }
+
+  const bio = document.querySelector("[data-profile-bio]");
+  if (bio && Array.isArray(profile.bio)) {
+    bio.replaceChildren(...profile.bio.map((paragraph) => createElement("p", "", paragraph)));
+  }
+}
+
+function renderNews() {
+  const list = document.querySelector("[data-news-list]");
+  if (!list) {
+    return;
+  }
+
+  const items = [...(window.newsItems || [])]
+    .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))
+    .slice(0, 5);
+
+  list.replaceChildren(
+    ...items.map((item) => {
+      const article = createElement("article", "timeline-item");
+      const time = createElement("time", "", formatDate(item.date));
+      if (item.date) {
+        time.setAttribute("datetime", item.date);
+      }
+
+      const body = createElement("div");
+      body.append(
+        createElement("h3", "", item.title),
+        createElement("p", "", item.summary)
+      );
+
+      if (item.link) {
+        const link = createElement("a", "text-link", "Read more");
+        link.href = item.link;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        body.append(link);
+      }
+
+      article.append(time, body);
+      return article;
+    })
+  );
+}
+
+function renderResearch() {
+  const list = document.querySelector("[data-research-list]");
+  const items = siteConfig.researchInterests || [];
+  if (!list) {
+    return;
+  }
+
+  list.replaceChildren(
+    ...items.map((item, index) => {
+      const article = createElement("article", "info-card");
+      article.append(
+        createElement("span", "card-index", String(index + 1).padStart(2, "0")),
+        createElement("h3", "", item.title),
+        createElement("p", "", item.summary)
+      );
+      return article;
+    })
+  );
+}
+
+function renderPublications() {
+  const list = document.querySelector("[data-publication-list]");
+  const items = window.publicationItems || [];
+  if (!list) {
+    return;
+  }
+
+  list.replaceChildren(
+    ...items.map((item) => {
+      const article = createElement("article", "publication-item");
+      const year = createElement("div", "publication-year", item.year);
+      const body = createElement("div", "publication-body");
+      body.append(
+        createElement("h3", "", item.title),
+        createElement("p", "publication-authors", item.authors),
+        createElement("p", "publication-venue", item.venue)
+      );
+
+      if (item.summary) {
+        body.append(createElement("p", "", item.summary));
+      }
+
+      if (Array.isArray(item.links)) {
+        const links = createElement("div", "item-links");
+        links.setAttribute("aria-label", "Publication links");
+        item.links
+          .filter((link) => link.url)
+          .forEach((link) => {
+            const anchor = createElement("a", "", link.label || "Link");
+            anchor.href = link.url;
+            anchor.target = "_blank";
+            anchor.rel = "noopener noreferrer";
+            links.append(anchor);
+          });
+        if (links.childElementCount > 0) {
+          body.append(links);
+        }
+      }
+
+      article.append(year, body);
+      return article;
+    })
+  );
+}
+
+function renderServices() {
+  const list = document.querySelector("[data-service-list]");
+  const items = siteConfig.services || [];
+  if (!list) {
+    return;
+  }
+
+  list.replaceChildren(
+    ...items.map((item) => {
+      const article = createElement("article", "info-card");
+      article.append(createElement("h3", "", item.title), createElement("p", "", item.summary));
+      return article;
+    })
+  );
+}
+
+function renderAwards() {
+  const list = document.querySelector("[data-award-list]");
+  const items = window.awardItems || [];
+  if (!list) {
+    return;
+  }
+
+  list.replaceChildren(
+    ...items.map((item) => {
+      const article = createElement("article", "award-item");
+      const dateWrap = createElement("div", "award-date");
+      if (item.date) {
+        const time = createElement("time", "", formatDate(item.date, { month: "short", year: "numeric" }));
+        time.setAttribute("datetime", item.date);
+        dateWrap.append(time);
+      } else {
+        dateWrap.append(createElement("span", "", item.year));
+      }
+
+      const body = createElement("div");
+      body.append(createElement("h3", "", item.title), createElement("p", "award-issuer", item.issuer));
+      if (item.summary) {
+        body.append(createElement("p", "", item.summary));
+      }
+      if (item.link) {
+        const link = createElement("a", "text-link", "Details");
+        link.href = item.link;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        body.append(link);
+      }
+
+      article.append(dateWrap, body);
+      return article;
+    })
+  );
+}
+
+function renderContent() {
+  renderProfile();
+  renderNews();
+  renderResearch();
+  renderPublications();
+  renderServices();
+  renderAwards();
+}
+
 try {
   const storedTheme = localStorage.getItem(themeStorageKey);
   if (storedTheme === "light" || storedTheme === "dark") {
@@ -56,6 +311,8 @@ if (themeToggle) {
     applyTheme(currentTheme() === "light" ? "dark" : "light");
   });
 }
+
+renderContent();
 
 const navLinks = Array.from(document.querySelectorAll(".site-nav a"));
 const sectionMap = new Map(
