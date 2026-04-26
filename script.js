@@ -177,13 +177,19 @@ function renderNews() {
     const row = createElement("li", "news-list-item");
     const body = createElement("div", "list-content");
     const heading = createElement("div", "list-heading news-heading");
-    const time = createElement("time", "list-date inline-date", formatDate(item.date));
+
     if (item.date) {
+      const time = createElement("time", "list-date inline-date", formatDate(item.date));
       time.setAttribute("datetime", item.date);
+      heading.append(time);
     }
 
-    heading.append(time, createElement("h3", "", item.title));
-    body.append(heading, createElement("p", "", item.summary));
+    heading.append(createElement("h3", "", item.title));
+    body.append(heading);
+
+    if (item.summary) {
+      body.append(createElement("p", "", item.summary));
+    }
 
     const link = createTextLink("Read more", item.link);
     if (link) {
@@ -227,10 +233,10 @@ function renderPublications() {
   }
 
   const card = createElement("article", "section-card");
-  const orderedList = createElement("ol", "ordered-list publication-ordered-list");
+  const publicationList = createElement("ul", "bullet-list publication-list-items");
 
   items.forEach((item) => {
-    const row = createElement("li", "ordered-list-item publication-list-item");
+    const row = createElement("li", "publication-list-item");
     const body = createElement("div", "list-content publication-body");
     const title = createElement("h3", "publication-title");
 
@@ -272,10 +278,10 @@ function renderPublications() {
     }
 
     row.append(body);
-    orderedList.append(row);
+    publicationList.append(row);
   });
 
-  card.append(orderedList);
+  card.append(publicationList);
   list.replaceChildren(card);
 }
 
@@ -291,8 +297,11 @@ function renderServices() {
 
   const bulletList = createElement("ul", "bullet-list");
   items.forEach((item) => {
-    const row = createElement("li", "");
-    row.append(createElement("h3", "", item.title), createElement("p", "", item.summary));
+    const row = createElement("li", "service-list-item");
+    row.append(createElement("h3", "", item.title));
+    if (item.summary) {
+      row.append(createElement("p", "", item.summary));
+    }
     bulletList.append(row);
   });
 
@@ -308,10 +317,10 @@ function renderAwards() {
   }
 
   const card = createElement("article", "section-card");
-  const orderedList = createElement("ol", "ordered-list");
+  const awardList = createElement("ul", "bullet-list award-bullet-list");
 
   items.forEach((item) => {
-    const row = createElement("li", "ordered-list-item");
+    const row = createElement("li", "award-list-item");
     const body = createElement("div", "list-content");
     const heading = createElement("div", "list-heading award-heading");
     heading.append(
@@ -335,10 +344,10 @@ function renderAwards() {
     }
 
     row.append(body);
-    orderedList.append(row);
+    awardList.append(row);
   });
 
-  card.append(orderedList);
+  card.append(awardList);
   list.replaceChildren(card);
 }
 

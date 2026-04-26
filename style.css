@@ -400,6 +400,10 @@ h3 {
   gap: 12px;
 }
 
+.publication-list-items {
+  gap: 16px;
+}
+
 .list-date {
   display: block;
   margin-bottom: 4px;
@@ -547,6 +551,28 @@ h3 {
 
 .publication-info-row a {
   margin-top: 0;
+}
+
+.service-list-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+
+.service-list-item h3 {
+  flex: 0 0 auto;
+  font-size: 1rem;
+}
+
+.service-list-item h3::after {
+  content: ":";
+  color: var(--text-soft);
+}
+
+.service-list-item p {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .publication-authors {
