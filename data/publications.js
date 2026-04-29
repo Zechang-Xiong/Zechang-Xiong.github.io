@@ -5,7 +5,7 @@ window.publicationItems = [
     venue: "[ICME'26]",
     pdf: "https://arxiv.org/pdf/2603.17347",
     code: "https://github.com/Zechang-Xiong/IIBalance",
-    bib: `@article{xiong2026beyond,
+    bib: `@inproceedings{xiong2026beyond,
   title={Beyond Forced Modality Balance: Intrinsic Information Budgets for Multimodal Learning},
   author={Xiong, Zechang and Li, Da and Tang, Kexin and Li, Pengyuan and Kong, Wenkang and Hu, Yulan},
   journal={arXiv preprint arXiv:2603.17347},
@@ -29,5 +29,21 @@ window.publicationItems = [
     ccf: "B",
     core: "A",
   },
-
+  {
+    title: "Ocular Disease Classification Based on Heterogeneous Interaction Among Visual, Diagnostic Semantics, and Generative Knowledge",
+    authors: "Zechang Xiong, Zhenyan Ji*, Jiuqian Dai, Hui Liu, Wenhui Chen, Shen Yin, Jose Enrique Armendariz-Inigo",
+    venue: "ICIC'25",
+    pdf: "https://link.springer.com/chapter/10.1007/978-981-95-0033-8_5",
+    code: "https://github.com/Zechang-Xiong/VIGOR-ODR",
+    bib: `@inproceedings{xiong2025ocular,
+  title={Ocular disease classification based on heterogeneous interaction among visual, diagnostic semantics, and generative knowledge},
+  author={Xiong, Zechang and Ji, Zhenyan and Dai, Jiuqian and Liu, Hui and Chen, Wenhui and Yin, Shen and Armendariz-Inigo, Jose Enrique},
+  booktitle={International Conference on Intelligent Computing},
+  pages={49--61},
+  year={2025},
+  organization={Springer}
+}`,
+    ccf: "C",
+    core: "C",
+  }
 ];
